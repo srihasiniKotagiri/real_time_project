@@ -5,24 +5,20 @@ import os
 
 app = Flask(__name__)
 
-# --- MODEL LOADING LOGIC ---
-# This ensures Render finds the files inside the 'project' folder
+# --- ROBUST MODEL LOADING ---
+# This ensures we find the 690kb file inside the 'project' folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# If you have two models, load them both here. 
-# I'm using 'model.pkl' as the primary. 
-# Change the filename if 'traffic_model.pkl' is the one you actually need.
-model_path = os.path.join(BASE_DIR, "model.pkl")
+model_path = os.path.join(BASE_DIR, "traffic_model.pkl")
 
 try:
     with open(model_path, "rb") as f:
         model = pickle.load(f)
-    print("✅ Model loaded successfully!")
+    print("✅ SUCCESS: traffic_model.pkl (690kb) loaded correctly.")
 except FileNotFoundError:
-    print(f"❌ ERROR: Could not find {model_path}")
+    print(f"❌ ERROR: {model_path} not found. Check your GitHub folder.")
     model = None
 except Exception as e:
-    print(f"❌ ERROR loading pickle: {e}")
+    print(f"❌ ERROR: Failed to unpickle model. {e}")
     model = None
 
 @app.route("/")
@@ -32,22 +28,24 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     if model is None:
-        return render_template("index.html", prediction_text="Error: Model not loaded on server.")
+        return render_template("index.html", prediction_text="Server Error: Model file missing or corrupt.")
 
     try:
+        # Get data from form
         lat = float(request.form["lat"])
         lng = float(request.form["lng"])
         date = request.form["date"]
         time_input = request.form["time"]
 
-        # Processing inputs
+        # Convert inputs to model features
         hour = int(time_input.split(":")[0])
         day = datetime.strptime(date, "%Y-%m-%d").weekday() + 1
 
-        # Prediction
+        # Predict
         prediction = model.predict([[hour, day]])
         output = int(prediction[0])
 
+        # Define traffic labels
         if output < 150:
             condition = "🟢 Low Traffic"
         elif output < 300:
@@ -59,9 +57,10 @@ def predict():
         return render_template("index.html", prediction_text=result)
 
     except Exception as e:
-        return render_template("index.html", prediction_text=f"Error during prediction: {e}")
+        print(f"Prediction Error: {e}")
+        return render_template("index.html", prediction_text="Error processing prediction. Check input formats.")
 
 if __name__ == "__main__":
-    # Render requires the app to listen on a specific port provided via environment variables
+    # Render dynamic port assignment
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
