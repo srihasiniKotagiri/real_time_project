@@ -19,8 +19,26 @@
 
         <label>Enter Time:</label>
         <input type="time" id="time">
+<form action="/predict" method="POST">
 
-        <button onclick="predictTraffic()">Predict</button>
+    <label>Latitude:</label>
+    <input type="text" name="lat" required>
+
+    <label>Longitude:</label>
+    <input type="text" name="lng" required>
+
+    <label>Date:</label>
+    <input type="date" name="date" required>
+
+    <label>Time:</label>
+    <input type="time" name="time" required>
+
+    <button type="submit">Predict Traffic</button>
+
+</form>
+
+<h3 class="prediction-text">{{ prediction_text }}</h3>
+      
     </div>
 
     <div class="result">
