@@ -3,58 +3,64 @@ import datetime
 
 app = Flask(__name__)
 
-# Home page
 @app.route('/')
 def home():
     return render_template('index.html')
 
 
-# Prediction route
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get form data
+        # Get raw values
         location = request.form.get('location')
         date = request.form.get('date')
         time = request.form.get('time')
-        latitude = float(request.form.get('latitude'))
-        longitude = float(request.form.get('longitude'))
+        lat = request.form.get('latitude')
+        lon = request.form.get('longitude')
 
-        # Convert date & time
+        # 🔍 DEBUG PRINTS (check in terminal / Render logs)
+        print("Location:", location)
+        print("Date:", date)
+        print("Time:", time)
+        print("Latitude:", lat)
+        print("Longitude:", lon)
+
+        # ❌ Check empty values
+        if not all([location, date, time, lat, lon]):
+            return render_template('index.html',
+                prediction_text="❌ Please fill all fields correctly.")
+
+        # Convert safely
+        latitude = float(lat)
+        longitude = float(lon)
+
         date_obj = datetime.datetime.strptime(date, "%Y-%m-%d")
         time_obj = datetime.datetime.strptime(time, "%H:%M")
 
-        day = date_obj.day
-        month = date_obj.month
         hour = time_obj.hour
 
-        # 👉 Dummy logic (replace with ML model later)
-        if hour in range(8, 11) or hour in range(17, 20):
+        # Simple prediction logic
+        if 8 <= hour <= 10 or 17 <= hour <= 19:
             traffic = "High Traffic 🚗🚗🚗"
-        elif hour in range(11, 17):
+        elif 11 <= hour <= 16:
             traffic = "Moderate Traffic 🚗🚗"
         else:
             traffic = "Low Traffic 🚗"
 
-        # Output message
         result = f"""
-        📍 Location: {location} <br>
-        🗓 Date: {date} <br>
-        ⏰ Time: {time} <br>
-        🌐 Lat: {latitude}, Lon: {longitude} <br><br>
-        🚦 Prediction: {traffic}
+        📍 {location} <br>
+        ⏰ {time} | 🗓 {date} <br>
+        🌐 ({latitude}, {longitude}) <br><br>
+        🚦 {traffic}
         """
 
         return render_template('index.html', prediction_text=result)
 
     except Exception as e:
         print("ERROR:", e)
-        return render_template(
-            'index.html',
-            prediction_text="❌ Error processing prediction. Please check inputs."
-        )
+        return render_template('index.html',
+            prediction_text=f"❌ Error: {str(e)}")
 
 
-# Run app
 if __name__ == "__main__":
     app.run(debug=True)
