@@ -11,26 +11,32 @@
     <h1>🚦 Traffic prediction System</h1>
 
     <div class="form">
-          <label>Enter Location:</label>
-    <input type="text" id="location" placeholder="Enter city or area">
-
-        <label>Enter Date:</label>
-        <input type="date" id="date">
-
-        <label>Enter Time:</label>
-        <input type="time" id="time">
-
+        
 
   <form action="/predict" method="POST">
 
  
 
+ <form action="/predict" method="POST">
+
+    <label>Enter Location:</label>
+    <input type="text" name="location" placeholder="Enter city or area" required>
+
+    <label>Enter Date:</label>
+    <input type="date" name="date" required>
+
+    <label>Enter Time:</label>
+    <input type="time" name="time" required>
+
     <label>Latitude:</label>
-    <input type="text" id="latitude" name="latitude" placeholder="Enter latitude">
+    <input type="number" step="any" name="latitude" placeholder="Enter latitude" required>
 
     <label>Longitude:</label>
-    <input type="text" id="longitude" name="longitude" placeholder="Enter longitude">
+    <input type="number" step="any" name="longitude" placeholder="Enter longitude" required>
 
+    <button type="submit">Predict Traffic</button>
+
+</form>
   
     <button type="submit">Predict Traffic</button>
 
